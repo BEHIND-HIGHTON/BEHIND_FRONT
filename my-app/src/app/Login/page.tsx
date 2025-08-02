@@ -60,6 +60,9 @@ export default function LoginPage() {
     // ✅ 토큰과 유저 정보 저장
     localStorage.setItem('accessToken', res.access_token);
     localStorage.setItem('userName', res.user.full_name);
+    localStorage.setItem('email',email );
+
+    console.log(email)
     window.location.reload(); 
 
     setSuccess(true);

@@ -2,25 +2,46 @@
 
 import { Header } from '../components/Header/page';
 import { useState } from 'react';
+import axios from "axios"
 
 export default function Analyze() {
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [message, setMessage] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
 
+  const [responseMessage, setResponseMessage] = useState<string | null>(null);
+
+
+
+  const name = localStorage.getItem("userName")
+
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option);
   };
 
-  const handleAnalyze = () => {
-    if (message.trim()) {
-      setIsAnalyzing(true);
-      // 분석 로직은 나중에 구현
-      setTimeout(() => {
+const handleAnalyze = () => {
+  if (selectedOption === 'send') {
+    const trimmedMessage = message.trim();
+    setIsAnalyzing(true);
+    setResponseMessage(null); // 이전 결과 지우기
+
+    axios.post(`https://1fadd9eda9d0.ngrok-free.app/simulate_message?message=${encodeURIComponent(trimmedMessage)}`)
+      .then(response => {
+        console.log(response.data);
+         // 서버 응답 저장
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        setResponseMessage('에러가 발생했습니다.');
+      })
+      .finally(() => {
         setIsAnalyzing(false);
-      }, 3000);
-    }
-  };
+      });
+  }
+};
+
+
+
 
   return (
     <div className="min-h-screen bg-[#f1f1f1]">
@@ -74,7 +95,7 @@ export default function Analyze() {
             <div className="flex justify-start">
               <div className="bg-[#dedfef] rounded-xl p-4 max-w-[568px]">
                 <p className="text-[#363636] text-xl">
-                  조상철님, 오늘 김태현님과의 대화에서 검토할 내용을 선택해주세요!
+                  {name}님, 오늘 사용자 대화에서 검토할 내용을 선택해주세요!
                 </p>
               </div>
               <div className="ml-2 self-end">
@@ -82,20 +103,8 @@ export default function Analyze() {
               </div>
             </div>
 
-            {/* 내 대화창 */}
-            <div className="flex justify-end">
-              <div className="mr-2 self-end">
-                <span className="text-xs text-[#a1a1a1]">오후 06:24</span>
-              </div>
-              <div className="bg-white border border-[#ababab] rounded-xl p-4 max-w-[609px]">
-                <p className="text-[#363636] text-xl">
-                  이번에 네가 맡은 파트는 그냥 네가 하던 대로 해도 될 것 같아. 사실 나도 뭐라고 말하기 좀 애매해서. 근데 혹시 시간 되면 다른 사람들 작업도 한 번 체크해줄 수 있어? 지난번처럼 일이 밀리진 않았으면 해서 말이야.
-                </p>
-              </div>
-            </div>
-
             {/* 검토 옵션 선택 */}
-            <div className="bg-white border border-[#ababab] rounded-xl p-6 max-w-[609px]">
+            <div className="ml-[60vh] bg-white border border-[#ababab] rounded-xl p-6 max-w-[609px]">
               <h3 className="text-xl font-semibold text-[#363636] mb-4">검토할 내용 선택</h3>
               <div className="space-y-3">
                 <div 
@@ -119,7 +128,7 @@ export default function Analyze() {
 
             {/* 메시지 입력 영역 */}
             {selectedOption && (
-              <div className="bg-white border border-[#ababab] rounded-xl p-6 max-w-[609px]">
+              <div className="ml-[60vh] bg-white border border-[#ababab] rounded-xl p-6 max-w-[609px]">
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -130,18 +139,12 @@ export default function Analyze() {
             )}
 
             {/* 분석 중 메시지 */}
-            {isAnalyzing && (
+            {responseMessage && (
               <div className="flex justify-start">
-                <div className="bg-[#dedfef] rounded-xl p-4 max-w-[494px]">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-11 h-11 bg-blue-500 rounded-full animate-pulse"></div>
-                    <div>
-                      <p className="text-[#3f5d9d] text-xl leading-6">
-                        김태현님의 성향과 위 메시지를 비교 분석 중입니다.<br />
-                        잠시만 기다려 주세요.
-                      </p>
-                    </div>
-                  </div>
+                <div className="bg-[#cde1ff] rounded-xl p-4 max-w-[494px]">
+                  <p className="text-[#1a2d5a] text-xl leading-6 whitespace-pre-wrap">
+                    {responseMessage}
+                  </p>
                 </div>
               </div>
             )}
